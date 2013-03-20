@@ -28,11 +28,12 @@ public class Model {
 		
 		AudioFileFormat outputFileFormat = AudioSystem.getAudioFileFormat(sourceAudio);
 		AudioFileFormat.Type outputFileType = outputFileFormat.getType();
-		AudioFormat outputFormat = new AudioFormat(inputFormat.getEncoding(), inputFormat.getSampleRate(), inputFormat.getSampleSizeInBits(), 1, inputFormat.getFrameSize(), inputFormat.getFrameRate(), inputFormat.isBigEndian());
+		AudioFormat outputFormat = new AudioFormat(inputFormat.getEncoding(), inputFormat.getSampleRate(), inputFormat.getSampleSizeInBits(), 1, 2, inputFormat.getFrameRate(), inputFormat.isBigEndian());
 		
 		
 		ByteArrayInputStream monoTrack = new ByteArrayInputStream(SplitStereoTrack(buffer));
 		System.out.println(inputStream.getFormat());
+		System.out.println(outputFormat);
 		
 		AudioInputStream outputAIS = new AudioInputStream(monoTrack, outputFormat, monoTrack.available()/outputFormat.getFrameSize());
 		
@@ -66,9 +67,29 @@ public class Model {
 		return monoTrack.clone();
 	}
 	
-	public static void ImportWavTrack(String fn)
+	public static short[] ImportWavTrack(String fn) throws Exception
 	{
 		File sourceAudio = new File(fn);
+		
+		AudioInputStream inputStream = AudioSystem.getAudioInputStream(sourceAudio);
+		int numBytes = inputStream.available();
+		byte[] tempBuffer = new byte[numBytes];
+		byte[] finalBuffer;
+		inputStream.read(tempBuffer, 0, numBytes);
+		
+		if (inputStream.getFormat().getChannels() > 2)
+		{
+			throw new Exception("Invalid file: Too many channels");
+		} 
+		else if (inputStream.getFormat().getChannels() == 2)
+		{
+			finalBuffer = SplitStereoTrack(tempBuffer);
+		}
+		else 
+		{
+			finalBuffer = tempBuffer;
+		}
+		
 		
 		
 		
