@@ -12,6 +12,8 @@ import javax.sound.sampled.AudioSystem;
 
 import javazoom.jl.converter.*;
 
+import org.tritonus.sampled.convert.*;
+
 public class AudioP {
 	
 	/** SplitStereoTrack
@@ -47,6 +49,13 @@ public class AudioP {
 		{
 			currentSample[i] = (short)(currentSample[i]/(2^currentBitrate)*(2^16));
 		}
+	}
+	
+	public static AudioInputStream ResampleAt44k(AudioInputStream AISInput)
+	{
+		SampleRateConversionProvider SRCP = new SampleRateConversionProvider();
+		AudioFormat newFormat = new AudioFormat(AISInput.getFormat().getEncoding(), (float)44100.0, AISInput.getFormat().getSampleSizeInBits(), AISInput.getFormat().getChannels(), AISInput.getFormat().getFrameSize(), AISInput.getFormat().getFrameRate(), AISInput.getFormat().isBigEndian());
+		return SRCP.getAudioInputStream(newFormat, AISInput);
 	}
 	
 	/** ExportSample
@@ -87,11 +96,24 @@ public class AudioP {
 		
 		File sourceAudio = new File(fn);
 		
-		// Initialize byte[]
+		// Initialize Stream
 		AudioInputStream inputStream = AudioSystem.getAudioInputStream(sourceAudio);
+		
+		// Check sample rate
+		if (inputStream.getFormat().getSampleRate() != 44100.0)
+		{
+			System.out.println("Testing sample rate converter");
+			
+			inputStream = ResampleAt44k(inputStream);
+		}
+		
+		// Initialize byte[]
 		int numBytes = inputStream.available();
 		byte[] tempBuffer = new byte[numBytes];
 		inputStream.read(tempBuffer, 0, numBytes);
+		
+		//System.out.println(inputStream.getFormat());
+		//System.out.flush();
 		
 		// Check channels
 		if (inputStream.getFormat().getChannels() > 2)
@@ -103,12 +125,6 @@ public class AudioP {
 			tempBuffer = SplitStereoTrack(tempBuffer);
 		}
 		
-		// Check sample rate
-		if (inputStream.getFormat().getSampleRate() != 44100.0)
-		{
-			throw new Exception("Invalid file: Bad sample rate (resample it yourself!)");
-		}
-		
 		// Convert to short[]
 		short[] finalBuffer = new short[tempBuffer.length/2];
 		ByteBuffer.wrap(tempBuffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(finalBuffer);
@@ -116,9 +132,9 @@ public class AudioP {
 		// Check bits
 		if (inputStream.getFormat().getSampleSizeInBits() != 16)
 		{
-			if (inputStream.getFormat().getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED || inputStream.getFormat().getSampleSizeInBits() > 16)
+			if (inputStream.getFormat().getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED || inputStream.getFormat().getSampleSizeInBits() > 16 || inputStream.getFormat().getSampleSizeInBits() <= 8)
 			{
-				throw new Exception("Invalid file: Unable to identify bitrate");
+				throw new Exception("Invalid file: Unacceptable sample size");
 			}
 			else
 			{

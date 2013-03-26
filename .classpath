@@ -4,5 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jl1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsyn-beta-16.5.14.jar"/>
+	<classpathentry kind="lib" path="lib/tritonus_remaining-0.3.6.jar"/>
+	<classpathentry kind="lib" path="lib/tritonus_share-0.3.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
