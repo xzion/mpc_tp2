@@ -2,7 +2,7 @@ package coen;
 
 public class Model {
 
-	/**
+	/** Main function
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
@@ -19,7 +19,12 @@ public class Model {
 		
 		String mp3source = "samples/test48.mp3";
 		short[] sample2 = AudioP.ImportMP3Sample(mp3source);
+		//IOP.WriteShortArrayToFile(sample2, "test.txt");
 		AudioP.ExportSample(mp3outputFilename, sample1);
+		
+		ButtonC btn1 = new ButtonC("00");
+		btn1.SetSample(sample2, sourceFilename);
+		btn1.OutputToFile();
 		
 	}
 
