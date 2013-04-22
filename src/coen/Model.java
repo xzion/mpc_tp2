@@ -1,5 +1,7 @@
 package coen;
 
+import javax.swing.*;
+
 public class Model {
 
 	/** Main function
@@ -25,6 +27,19 @@ public class Model {
 		ButtonC btn1 = new ButtonC("00");
 		btn1.SetSample(sample2, sourceFilename);
 		btn1.OutputToFile();
+		
+		MPCConfig MPCModel = new MPCConfig();
+		
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				GUI.CreateAndShowGUI();
+			}
+		});
+		
+	}
+	
+	public MPCConfig getModel()
+	{
 		
 	}
 

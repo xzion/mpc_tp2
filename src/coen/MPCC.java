@@ -19,5 +19,9 @@ public class MPCC {
 		
 		this.sampleList = new ArrayList<Entry<short[], String>>();
 	}
+	
+	public ArrayList<ButtonC> getButtons() {
+		return buttons;
+	}
 
 }
