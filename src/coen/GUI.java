@@ -74,6 +74,354 @@ public class GUI {
 		JLabel label;
 		JButton button;
 		JComboBox cb;
+		JSlider slide;
+		
+		label = new JLabel("Button #");
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		String[] sampleStrings = {"sample1", "sample2"};
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 1;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 1;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 50));
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		button = new JButton("Reset");
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		button = new JButton("Play");
+		c.gridx = 1;
+		c.gridy = 3;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		button = new JButton("Pause");
+		c.gridx = 2;
+		c.gridy = 3;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		button = new JButton("Set Start");
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		button = new JButton("Set End");
+		c.gridx = 1;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		button = new JButton("Slice");
+		c.gridx = 2;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("FX:");
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		String[] fxStrings = {"fx1", "fx2"};
+		cb = new JComboBox(fxStrings);
+		c.gridx = 1;
+		c.gridy = 5;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		label = new JLabel("Param1:");
+		c.gridx = 0;
+		c.gridy = 6;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		slide = new JSlider(JSlider.HORIZONTAL, 0, 127, 63);
+		c.gridx = 1;
+		c.gridy = 6;
+		c.gridheight = 1;
+		c.gridwidth = 2;
+		pane.add(slide, c);
+		
+		label = new JLabel("Param2:");
+		c.gridx = 0;
+		c.gridy = 7;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		slide = new JSlider(JSlider.HORIZONTAL, 0, 127, 63);
+		c.gridx = 1;
+		c.gridy = 7;
+		c.gridheight = 1;
+		c.gridwidth = 2;
+		pane.add(slide, c);
+		
+		button = new JButton("Apply FX");
+		c.gridx = 0;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 3;
+		button.setPreferredSize(new Dimension(270, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("Playback Style:");
+		c.gridx = 0;
+		c.gridy = 9;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		String[] latchHoldStrings = {"Latch", "Hold"};
+		cb = new JComboBox(latchHoldStrings);
+		c.gridx = 1;
+		c.gridy = 9;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		label = new JLabel("Loop interval:");
+		c.gridx = 0;
+		c.gridy = 10;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		String[] loopStrings = {"1/1", "1/2", "1/4", "1/8", "1/16", "1/32"};
+		cb = new JComboBox(loopStrings);
+		c.gridx = 1;
+		c.gridy = 10;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+				
+		return pane;
+	}
+	
+	private static JPanel createWaveformPane() {
+		JPanel pane = new JPanel();
+		pane.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.insets = new Insets(4, 4, 4, 4);
+		
+		JLabel label;
+		JButton button;
+		JComboBox cb;
+		JSlider slide;
+		
+		// Sample 1
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		String[] sampleStrings = {"sample1", "sample2"};
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 25));
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		// Sample 2
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 2;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 2;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 25));
+		c.gridx = 0;
+		c.gridy = 3;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		// Sample 3
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 4;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 25));
+		c.gridx = 0;
+		c.gridy = 5;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		// Sample 4
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 6;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 6;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 6;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 25));
+		c.gridx = 0;
+		c.gridy = 7;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
+		
+		// Sample 5
+		label = new JLabel("Sample:");
+		c.gridx = 0;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		pane.add(label, c);
+		
+		cb = new JComboBox(sampleStrings);
+		c.gridx = 1;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		cb.setPreferredSize(new Dimension(90, 25));
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 2;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(90, 25));
+		pane.add(button, c);
+		
+		label = new JLabel("WAVEFORM GOES HERE");
+		label.setPreferredSize(new Dimension(150, 25));
+		c.gridx = 0;
+		c.gridy = 9;
+		c.gridheight = 1;
+		c.gridwidth = 5;
+		pane.add(label, c);
 		
 		return pane;
 	}
@@ -142,8 +490,12 @@ public class GUI {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setPreferredSize(new Dimension(320, 400));
 		
+		JPanel card1 = new JPanel(new FlowLayout());
+		card1.add(createConfigPanel());		
+				
+		
 		//Create the "cards".
-        JPanel card1 = new JPanel() {
+        JPanel card2 = new JPanel(new FlowLayout()) {
             //Make the panel wider than it really needs, so
             //the window's wide enough for the tabs to stay
             //in one row.
@@ -153,12 +505,7 @@ public class GUI {
                 return size;
             }
         };
-        card1.add(new JButton("Button 1"));
-        card1.add(new JButton("Button 2"));
-        card1.add(new JButton("Button 3"));
- 
-        JPanel card2 = new JPanel();
-        card2.add(new JTextField("TextField", 20));
+        card2.add(createWaveformPane());
  
         tabbedPane.addTab("Button Config", card1);
         tabbedPane.addTab("Waveform Viewer", card2);

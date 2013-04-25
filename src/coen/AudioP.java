@@ -51,6 +51,17 @@ public class AudioP {
 		}
 	}
 	
+	public static short[] GenerateSineWave(int frequency)
+	{
+		short[] swave = new short[22050];
+		for (int i = 0; i < 22050; i++)
+		{
+			swave[i] = (short)(Math.sin(2*Math.PI*i/(44100/frequency))*32767);
+		}
+		
+		return swave;
+	}
+	
 	public static AudioInputStream ResampleAt44k(AudioInputStream AISInput)
 	{
 		SampleRateConversionProvider SRCP = new SampleRateConversionProvider();
