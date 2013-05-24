@@ -1,7 +1,6 @@
 package coen;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.nio.ByteBuffer;
@@ -12,10 +11,10 @@ import java.nio.channels.FileChannel;
 public class ButtonC {
 	
 	public String ID;
-	private boolean latching;
-	private int loopInterval;
-	private short[] sample;
-	private String sampleLocation;	
+	private String fileName;
+	private char latching;
+	private char loopInterval;
+	private short[] sample;	
 	
 	public String GetID()
 	{
@@ -27,33 +26,27 @@ public class ButtonC {
 		return this.sample.clone();
 	}
 	
-	public boolean GetLatching()
+	public char GetLatching()
 	{
 		return this.latching;
 	}
 	
-	public int GetLoopInterval()
+	public char GetLoopInterval()
 	{
 		return this.loopInterval;
 	}
 	
-	public String GetSampleLocation()
-	{
-		return this.sampleLocation;
-	}
-	
-	public void SetSample(short[] newSample, String fn)
+	public void SetSample(short[] newSample)
 	{
 		this.sample = newSample.clone();
-		this.sampleLocation = fn;
 	}
 	
-	public void SetLoopInterval(int li)
+	public void SetLoopInterval(char li)
 	{
 		this.loopInterval = li;
 	}
 	
-	public void SetLatching(boolean latch)
+	public void SetLatching(char latch)
 	{
 		this.latching = latch;
 	}
@@ -63,37 +56,16 @@ public class ButtonC {
 	 * 
 	 * @throws Exception - Bad Filename/Unable to create file
 	 */
-	public void OutputToFile() throws Exception
+	public void OutputToFile(String path) throws Exception
 	{
-		//FileWriter outputFile = new FileWriter(this.ID);
-		
-		// First character is latching: 0 = latch, 1 = hold
-//		if (this.latching)
-//		{
-//			outputFile.write("1 ");
-//		}
-//		else 
-//		{
-//			outputFile.write("0 ");
-//		}
-		
-		// Second character is loop interval: number 1-5 for different intervals
-		// Could be changed to the actual loop divider if easier
-//		outputFile.write(this.loopInterval + " ");
+		File dir = new File(path);
+		dir.mkdirs();
+		File outputFile = new File(dir, this.fileName);
 		
 		// Output the length of the array, followed by the array itself
 		// Currently output as spaced, signed shorts (-65536 <-> 65536)
 		if (this.sample != null)
 		{
-//			outputFile.write(sample.length);
-//			for (int i = 0; i < sample.length; i++)
-//			{
-//				outputFile.write(sample[i]);
-//				if (i < 3) {
-//					System.out.println(sample[i]);
-//				}
-//				
-//			}
 			short[] rescaledShorts = new short[sample.length];
 			
 			for (int i = 0; i < sample.length; i++)
@@ -113,7 +85,7 @@ public class ButtonC {
 			ShortBuffer myShortBuffer = myByteBuffer.asShortBuffer();
 			myShortBuffer.put(rescaledShorts);
 
-			FileChannel out = new FileOutputStream(this.ID).getChannel();
+			FileChannel out = new FileOutputStream(outputFile).getChannel();
 			out.write(myByteBuffer);
 			out.close();
 			
@@ -123,17 +95,19 @@ public class ButtonC {
 			// The button hasn't been assigned
 			// Output for the MPC will be a single 0
 			//outputFile.write(0);
+			FileWriter fw = new FileWriter(outputFile, false);
+			fw.write(0);
+			fw.close();
 		}
-		//outputFile.close();
 	}
 	
-	public ButtonC (String id)
+	public ButtonC (String id, String fn)
 	{
 		this.ID = id;
-		this.latching = true;
-		this.loopInterval = 1;
-		this.sample = null;
-		this.sampleLocation = null;		
+		this.fileName = fn;
+		this.latching = 0x01;
+		this.loopInterval = 0x02;
+		this.sample = null;	
 	}
 
 }

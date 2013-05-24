@@ -2,6 +2,7 @@ package coen;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
 public class GUI {
 	
@@ -59,6 +60,7 @@ public class GUI {
 			c.gridx = i%4;
 			c.gridy = i/4;
 			c.insets = new Insets(4, 4, 4, 4);
+			button.addActionListener(Listeners.ImportFileFromMenu);
 			pane.add(button, c);
 		}
 
@@ -536,6 +538,7 @@ public class GUI {
 		menu.addSeparator();
 		
 		item = new JMenuItem("Exit");
+		item.addActionListener(Listeners.ExitApplication);
 		menu.add(item);
 		
 		return menuBar;
