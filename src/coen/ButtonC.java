@@ -8,13 +8,24 @@ import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 
+import javax.sound.*;
+import javax.sound.sampled.*;
+import javax.swing.SwingWorker;
+
+import sun.audio.*;
+
 public class ButtonC {
 	
-	public String ID;
+	
+	private String ID;
 	private String fileName;
 	private char latching;
 	private char loopInterval;
-	private short[] sample;	
+	private short[] sample;
+	private Waveform wf;
+	private byte[] aStream;
+	private int samplesPerPx;
+	
 	
 	public String GetID()
 	{
@@ -38,7 +49,11 @@ public class ButtonC {
 	
 	public void SetSample(short[] newSample)
 	{
-		this.sample = newSample.clone();
+		this.sample = newSample;
+		this.wf = new Waveform(newSample);
+		this.wf.addMouseListener(Listeners.WaveformClicked);
+		this.aStream = AudioP.getStream(newSample);
+		this.samplesPerPx = newSample.length/270;
 	}
 	
 	public void SetLoopInterval(char li)
@@ -49,6 +64,58 @@ public class ButtonC {
 	public void SetLatching(char latch)
 	{
 		this.latching = latch;
+	}
+	
+	public Waveform getWaveform()
+	{
+		return this.wf;
+	}
+	
+	public void setPlayhead (int ph)
+	{
+		this.wf.setPlayhead(ph);
+		//this.wf.getGraphics().clearRect(0, 0, 270, 60);
+		this.wf.repaint();
+	}
+	
+	public void sliceLeft()
+	{
+		int lengthOfNewSample = this.sample.length-(this.samplesPerPx*this.wf.getPlayhead());
+		if (lengthOfNewSample == 0)
+		{
+			short[] dummyShort = new short[1];
+			dummyShort[0] = 0;
+			this.SetSample(dummyShort);
+		}
+		else
+		{
+			short[] newSample = new short[lengthOfNewSample];
+			for (int i = 0; i < lengthOfNewSample; i++)
+			{
+				newSample[i] = this.sample[i+this.samplesPerPx*this.wf.getPlayhead()];
+			}
+			this.SetSample(newSample);
+		}
+	}
+	
+	public void sliceRight()
+	{
+		int lengthOfNewSample = this.sample.length-(this.samplesPerPx*(270-this.wf.getPlayhead()));
+		if (lengthOfNewSample == 0)
+		{
+			short[] dummyShort = new short[1];
+			dummyShort[0] = 0;
+			this.SetSample(dummyShort);
+		}
+		else
+		{
+			short[] newSample = new short[lengthOfNewSample];
+			for (int i = 0; i < lengthOfNewSample; i++)
+			{
+				newSample[i] = this.sample[i];
+			}
+			this.SetSample(newSample);
+		}
 	}
 	
 	/**OutputToFile
@@ -105,9 +172,14 @@ public class ButtonC {
 	{
 		this.ID = id;
 		this.fileName = fn;
-		this.latching = 0x01;
-		this.loopInterval = 0x02;
+		this.latching = 0x00;
+		this.loopInterval = 0x00;
 		this.sample = null;	
+		short[] dummyShort = new short[1];
+		dummyShort[0] = 0;
+		this.wf = new Waveform(dummyShort);
+		this.wf.addMouseListener(Listeners.WaveformClicked);
+		this.samplesPerPx = 0;
 	}
 
 }

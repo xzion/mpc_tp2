@@ -14,7 +14,11 @@ import javazoom.jl.converter.*;
 
 import org.tritonus.sampled.convert.*;
 
+import sun.audio.AudioStream;
+
 public class AudioP {
+	
+	public static final AudioFormat generalAF = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, (float)44100.0, 16, 1, 2, 2, false);
 	
 	/** SplitStereoTrack
 	 * Reduce a stereo byte[] to a mono byte[]
@@ -51,6 +55,28 @@ public class AudioP {
 		}
 	}
 	
+	public static short[] scaleVolume(short[] originalSample)
+	{
+		short[] scaledSample = new short[originalSample.length];
+		int max = 0;
+		for (int i = 0; i < originalSample.length; i++)
+		{
+			if (originalSample[i] > max)
+			{
+				max = originalSample[i];
+			}
+		}
+		float scale = 32768/(float)max;
+		//int scale = 32768/max;
+		System.out.println(scale);
+		
+		for (int i = 0; i < originalSample.length; i++)
+		{
+			scaledSample[i] = (short)(originalSample[i]*scale);
+		}
+		return scaledSample;
+	}
+	
 	public static short[] GenerateSineWave(int frequency)
 	{
 		short[] swave = new short[22050];
@@ -67,6 +93,16 @@ public class AudioP {
 		SampleRateConversionProvider SRCP = new SampleRateConversionProvider();
 		AudioFormat newFormat = new AudioFormat(AISInput.getFormat().getEncoding(), (float)44100.0, AISInput.getFormat().getSampleSizeInBits(), AISInput.getFormat().getChannels(), AISInput.getFormat().getFrameSize(), AISInput.getFormat().getFrameRate(), AISInput.getFormat().isBigEndian());
 		return SRCP.getAudioInputStream(newFormat, AISInput);
+	}
+	
+	public static byte[] getStream(short[] sample)
+	{
+		// Standard output format. 16bit, 44.1kHz, mono
+		AudioFormat outputFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, (float)44100.0, 16, 1, 2, 2, false);
+		
+		byte[] sampleBytes = new byte[sample.length*2];
+		ByteBuffer.wrap(sampleBytes).order(ByteOrder.BIG_ENDIAN).asShortBuffer().put(sample);
+		return sampleBytes;
 	}
 	
 	/** ExportSample
@@ -114,7 +150,6 @@ public class AudioP {
 		if (inputStream.getFormat().getSampleRate() != 44100.0)
 		{
 			System.out.println("Testing sample rate converter");
-			
 			inputStream = ResampleAt44k(inputStream);
 		}
 		
@@ -131,7 +166,7 @@ public class AudioP {
 		{
 			throw new Exception("Invalid file: Too many channels");
 		} 
-		else if (inputStream.getFormat().getChannels() == 2)
+		else if (inputStream.getFormat().getChannels() == 2 && inputStream.getFormat().getSampleSizeInBits() != 32)
 		{
 			tempBuffer = SplitStereoTrack(tempBuffer);
 		}
@@ -143,7 +178,19 @@ public class AudioP {
 		// Check bits
 		if (inputStream.getFormat().getSampleSizeInBits() != 16)
 		{
-			if (inputStream.getFormat().getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED || inputStream.getFormat().getSampleSizeInBits() > 16 || inputStream.getFormat().getSampleSizeInBits() <= 8)
+			if (inputStream.getFormat().getSampleSizeInBits() == 32)
+			{
+				int[] intBuff = new int[tempBuffer.length/4];
+				short[] bitBuffer = new short[tempBuffer.length/8];
+				ByteBuffer.wrap(tempBuffer).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(intBuff);
+				for (int i = 0; i < bitBuffer.length; i++)
+				{
+					bitBuffer[i] = (short)(intBuff[2*i]/65536);
+				}
+				System.out.println("32bit sample " + finalBuffer.length);
+				return bitBuffer.clone();
+			}
+			else if (inputStream.getFormat().getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED || inputStream.getFormat().getSampleSizeInBits() > 16 || inputStream.getFormat().getSampleSizeInBits() <= 8)
 			{
 				throw new Exception("Invalid file: Unacceptable sample size");
 			}
@@ -160,7 +207,7 @@ public class AudioP {
 	{
 		System.out.println("Converting MP3 Sample");
 		// Use JLayer to convert to wav
-		String tmpSample = "tmp/00.wav";
+		String tmpSample = "00.wav";
 		Converter cvt = new Converter();
 		cvt.convert(fn, tmpSample);
 		
@@ -169,7 +216,7 @@ public class AudioP {
 		short[] newSample = ImportWavSample(tmpSample);
 		
 		// Remove the tempfile !!DOESNT WORK!!
-		sourceAudio.delete();
+		//sourceAudio.delete();
 		
 		return newSample.clone();
 	}

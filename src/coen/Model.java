@@ -2,51 +2,28 @@ package coen;
 
 import java.util.ArrayList;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
+import javax.swing.SwingWorker;
+
 public class Model {
 
 	/** Main function
 	 * @param args
 	 */
-	
+	private static final AudioFormat audioFormat = new AudioFormat(44100, 16, 1, true, true);
 	private static MPCC MPCModel;
 	private static ArrayList<ImportedSample> importedSamples;
+	public static PlaybackWorker player;
+	public static int playing = 0;
+	public static short[] playbackArray;
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		
 		MPCModel = new MPCC();
-		
-		String samplePath = "C:/temp/";
-		MPCModel.ExportConfig(samplePath);
-		
-		
-		
-		
-		
-		
-
-		
-		
-//		String sourceFilename = "samples/Juicyh1.wav";
-//		String wavoutputFilename = "wavout.wav";
-//		String mp3outputFilename = "mp3out.wav";
-//		
-//		short[] sample1 = AudioP.ImportWavSample(sourceFilename);
-//		AudioP.ExportSample(wavoutputFilename, sample1);
-//		
-//		System.out.println("");
-//		
-//		String mp3source = "samples/flume1.mp3";
-//		short[] sample2 = AudioP.ImportMP3Sample(mp3source);
-//		//IOP.WriteShortArrayToFile(sample2, "test.txt");
-//		AudioP.ExportSample(mp3outputFilename, sample2);
-			
-//		for (int i = 0; i < 16; i++)
-//		{
-//			ButtonC btn = new ButtonC(audioFileNames[i]);
-//			btn.SetSample(AudioP.GenerateSineWave(100*(1+i)), "flume");
-//			btn.OutputToFile();
-//		}
+		player = new PlaybackWorker();
 		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -59,6 +36,45 @@ public class Model {
 	public static MPCC getModel()
 	{
 		return MPCModel;
+	}
+	
+	public static class PlaybackWorker extends SwingWorker<Integer, Integer>
+	{
+	    protected Integer doInBackground() throws Exception
+	    {
+	        // Do a time-consuming task.
+	    	ButtonC currentBtn = Model.getModel().getButtons().get(GUI.currentButton);
+	    	//byte[] sampleForPlayback = AudioP.getStream(currentBtn.GetSample());
+	    	byte[] sampleForPlayback = AudioP.getStream(Model.playbackArray);
+	    	try {
+	    		SourceDataLine line = AudioSystem.getSourceDataLine(audioFormat);
+	    		int samplesPerPx = sampleForPlayback.length/270 - (sampleForPlayback.length/270)%2;
+	            line.open(audioFormat);
+	            line.start();
+	            for (int i = currentBtn.getWaveform().getPlayhead(); i < 270; i++)
+	            {
+	            	if (this.isCancelled())
+	            	{
+	            		line.drain();
+	    	            line.close();
+	            		return 0;
+	            	}
+	            	line.write(sampleForPlayback, i*samplesPerPx, samplesPerPx);
+	            	Model.getModel().getButtons().get(GUI.currentButton).setPlayhead(i);
+	            }
+	            line.drain();
+	            line.close();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    	return 0;
+	    }
+
+	    protected void done()
+	    {
+	    	Model.playing = 0;
+	    	System.out.println("sample done");
+	    }
 	}
 
 }

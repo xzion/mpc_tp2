@@ -6,24 +6,64 @@ import java.awt.event.*;
 
 public class GUI {
 	
+	public static JFrame masterFrame;
+	//public static JPanel totalGUI;
+	
+	public static int currentButton;
+	public static int currentSample;
+	public static int currentWaveform;
+	public static Waveform[] viewerWaveforms;
+	public static int loadWaveformTabFirst;
+	public static int FXParam;
+	public static int FXMode;
+	
 	public static void CreateAndShowGUI() {
-		JFrame frame = new JFrame("Team 23 MPC Config");
-		frame.setLayout(new FlowLayout());
-		frame.setPreferredSize(new Dimension(640, 480));
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Initialize the globals
+		currentButton = 12;
+		currentSample = 0;
+		currentWaveform = 0;
+		loadWaveformTabFirst = 0;
+		FXParam = 63;
+		FXMode = 0;
+		viewerWaveforms = new Waveform[5];
+		for (int i = 0; i < 5; i++)
+		{
+			short[] dummyShort = new short[1];
+			dummyShort[0] = 0;
+			viewerWaveforms[i] = new Waveform(dummyShort);
+		}
+		
+		// Build the frame
+		masterFrame = new JFrame("Team 23 MPC Config");
+		masterFrame.setLayout(new FlowLayout());
+		masterFrame.setPreferredSize(new Dimension(640, 480));
+		masterFrame.setResizable(false);
+		masterFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel pane = createContentPane();
 		
-		frame.setJMenuBar(createMenuBar());
-		frame.getContentPane().add(pane);
-		frame.pack();
-		frame.setVisible(true);
+		masterFrame.setJMenuBar(createMenuBar());
+		masterFrame.getContentPane().add(pane);
+		masterFrame.pack();
+		masterFrame.setVisible(true);
+	}
+	
+	public static void RebuildGUI()
+	{
+		masterFrame.getContentPane().removeAll();
+		
+		JPanel pane = createContentPane();
+		masterFrame.setJMenuBar(createMenuBar());
+		masterFrame.getContentPane().add(pane);
+		
+		masterFrame.revalidate();
+		masterFrame.repaint();
 	}
 	
 	private static JPanel createContentPane() {
 		JPanel totalGUI = new JPanel();
 		totalGUI.setLayout(new GridBagLayout());
+		
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(4, 4, 4, 4);
 		
@@ -60,10 +100,9 @@ public class GUI {
 			c.gridx = i%4;
 			c.gridy = i/4;
 			c.insets = new Insets(4, 4, 4, 4);
-			button.addActionListener(Listeners.ImportFileFromMenu);
+			button.addActionListener(Listeners.ButtonSelection);
 			pane.add(button, c);
 		}
-
 		return pane;
 	}
 	
@@ -72,33 +111,31 @@ public class GUI {
 		pane.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(4, 4, 4, 4);
-		
+
+		ButtonC currentBtn = Model.getModel().getButtons().get(GUI.currentButton);
 		JLabel label;
 		JButton button;
-		JComboBox cb;
+		JComboBox<String> cb;
 		JSlider slide;
 		
-		label = new JLabel("Button #");
+		label = new JLabel("Button " + currentBtn.GetID());
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridheight = 1;
 		c.gridwidth = 5;
 		pane.add(label, c);
-		
-		label = new JLabel("Sample:");
+
+		cb = new JComboBox<String>(Model.getModel().getSampleStrings());
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
-		
-		String[] sampleStrings = {"sample1", "sample2"};
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 1;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
+		c.gridwidth = 2;
+		cb.setPreferredSize(new Dimension(190, 25));
+		if (GUI.currentSample != 0)
+		{
+			cb.setSelectedIndex(GUI.currentSample);
+		}
+		cb.addActionListener(Listeners.SampleChanged);
 		pane.add(cb, c);
 		
 		button = new JButton("Load");
@@ -106,64 +143,71 @@ public class GUI {
 		c.gridy = 1;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.LoadSampleToButton);
 		pane.add(button, c);
 		
-		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 50));
+		Waveform wf = currentBtn.getWaveform();
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridheight = 1;
 		c.gridwidth = 5;
-		pane.add(label, c);
 		
-		button = new JButton("Reset");
+		pane.add(wf, c);
+		
+		button = new JButton("Play");
 		c.gridx = 0;
 		c.gridy = 3;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
-		pane.add(button, c);
-		
-		button = new JButton("Play");
-		c.gridx = 1;
-		c.gridy = 3;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.PlayButtonSample);
 		pane.add(button, c);
 		
 		button = new JButton("Pause");
+		c.gridx = 1;
+		c.gridy = 3;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.PauseButtonSample);
+		pane.add(button, c);
+		
+		button = new JButton("Reset");
 		c.gridx = 2;
 		c.gridy = 3;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.ResetButtonSample);
 		pane.add(button, c);
 		
-		button = new JButton("Set Start");
+		button = new JButton("Slice Left");
 		c.gridx = 0;
 		c.gridy = 4;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.SliceSampleLeft);
 		pane.add(button, c);
 		
-		button = new JButton("Set End");
+		button = new JButton("Slice Right");
 		c.gridx = 1;
 		c.gridy = 4;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.SliceSampleRight);
 		pane.add(button, c);
 		
-		button = new JButton("Slice");
+		button = new JButton("Clear");
 		c.gridx = 2;
 		c.gridy = 4;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.ClearSample);
 		pane.add(button, c);
 		
 		label = new JLabel("FX:");
@@ -173,16 +217,17 @@ public class GUI {
 		c.gridwidth = 1;
 		pane.add(label, c);
 		
-		String[] fxStrings = {"fx1", "fx2"};
-		cb = new JComboBox(fxStrings);
+		cb = new JComboBox<String>(FXP.fxNames);
 		c.gridx = 1;
 		c.gridy = 5;
 		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
+		c.gridwidth = 2;
+		cb.setPreferredSize(new Dimension(190, 25));
+		cb.setSelectedIndex(FXMode);
+		cb.addActionListener(Listeners.FXModeChanged);
 		pane.add(cb, c);
 		
-		label = new JLabel("Param1:");
+		label = new JLabel("Variation:");
 		c.gridx = 0;
 		c.gridy = 6;
 		c.gridheight = 1;
@@ -190,32 +235,40 @@ public class GUI {
 		pane.add(label, c);
 		
 		slide = new JSlider(JSlider.HORIZONTAL, 0, 127, 63);
+		slide.setValue(FXParam);
 		c.gridx = 1;
 		c.gridy = 6;
 		c.gridheight = 1;
 		c.gridwidth = 2;
+		slide.setPreferredSize(new Dimension(190, 25));
+		slide.addChangeListener(Listeners.FXParamChanged);
 		pane.add(slide, c);
 		
-		label = new JLabel("Param2:");
-		c.gridx = 0;
-		c.gridy = 7;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
-		
-		slide = new JSlider(JSlider.HORIZONTAL, 0, 127, 63);
-		c.gridx = 1;
-		c.gridy = 7;
-		c.gridheight = 1;
-		c.gridwidth = 2;
-		pane.add(slide, c);
-		
-		button = new JButton("Apply FX");
+		button = new JButton("Preview");
 		c.gridx = 0;
 		c.gridy = 8;
 		c.gridheight = 1;
-		c.gridwidth = 3;
-		button.setPreferredSize(new Dimension(270, 25));
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.PreviewSampleFX);
+		pane.add(button, c);
+		
+		button = new JButton("Stop");
+		c.gridx = 1;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.PauseButtonSample);
+		pane.add(button, c);
+		
+		button = new JButton("Apply FX");
+		c.gridx = 2;
+		c.gridy = 8;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(95, 25));
+		button.addActionListener(Listeners.ApplyFXToButton);
 		pane.add(button, c);
 		
 		label = new JLabel("Playback Style:");
@@ -226,12 +279,14 @@ public class GUI {
 		pane.add(label, c);
 		
 		String[] latchHoldStrings = {"Latch", "Hold"};
-		cb = new JComboBox(latchHoldStrings);
+		cb = new JComboBox<String>(latchHoldStrings);
 		c.gridx = 1;
 		c.gridy = 9;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
+		cb.setSelectedIndex((int)currentBtn.GetLatching());
+		cb.setPreferredSize(new Dimension(95, 25));
+		cb.addActionListener(Listeners.LatchHoldChanged);
 		pane.add(cb, c);
 		
 		label = new JLabel("Loop interval:");
@@ -242,12 +297,14 @@ public class GUI {
 		pane.add(label, c);
 		
 		String[] loopStrings = {"1/1", "1/2", "1/4", "1/8", "1/16", "1/32"};
-		cb = new JComboBox(loopStrings);
+		cb = new JComboBox<String>(loopStrings);
 		c.gridx = 1;
 		c.gridy = 10;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
+		cb.setPreferredSize(new Dimension(95, 25));
+		cb.setSelectedIndex((int)currentBtn.GetLoopInterval());
+		cb.addActionListener(Listeners.LoopIntervalChanged);
 		pane.add(cb, c);
 				
 		return pane;
@@ -257,173 +314,84 @@ public class GUI {
 		JPanel pane = new JPanel();
 		pane.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.insets = new Insets(4, 4, 4, 4);
+		c.insets = new Insets(3, 3, 3, 3);
 		
-		JLabel label;
 		JButton button;
-		JComboBox cb;
-		JSlider slide;
+		JComboBox<String> cb;
+		Waveform wf;
 		
-		// Sample 1
-		label = new JLabel("Sample:");
+		cb = new JComboBox<String>(Model.getModel().getSampleStrings());
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
-		
-		String[] sampleStrings = {"sample1", "sample2"};
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 0;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
+		c.gridwidth = 2;
+		cb.setPreferredSize(new Dimension(180, 25));
+		if (GUI.currentSample != 0)
+		{
+			cb.setSelectedIndex(GUI.currentSample);
+		}
+		cb.addActionListener(Listeners.SampleChanged);
 		pane.add(cb, c);
 		
-		button = new JButton("Load");
+		String[] channelStrings = {"1", "2", "3", "4", "5"};
+		cb = new JComboBox<String>(channelStrings);
 		c.gridx = 2;
 		c.gridy = 0;
 		c.gridheight = 1;
 		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
+		cb.setPreferredSize(new Dimension(40, 25));
+		cb.setSelectedIndex(GUI.currentWaveform);
+		cb.addActionListener(Listeners.WaveformSelectorChanged);
+		pane.add(cb, c);
+		
+		button = new JButton("Load");
+		c.gridx = 3;
+		c.gridy = 0;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		button.setPreferredSize(new Dimension(70, 25));
+		button.addActionListener(Listeners.LoadWaveform);
 		pane.add(button, c);
 		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 25));
+		wf = viewerWaveforms[0];
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 1;
 		c.gridheight = 1;
-		c.gridwidth = 5;
-		pane.add(label, c);
+		c.gridwidth = 4;
+		pane.add(wf, c);
 		
-		// Sample 2
-		label = new JLabel("Sample:");
+		wf = viewerWaveforms[1];
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
+		c.gridwidth = 4;
+		pane.add(wf, c);
 		
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 2;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
-		pane.add(cb, c);
-		
-		button = new JButton("Load");
-		c.gridx = 2;
-		c.gridy = 2;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
-		pane.add(button, c);
-		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 25));
+		wf = viewerWaveforms[2];
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 3;
 		c.gridheight = 1;
-		c.gridwidth = 5;
-		pane.add(label, c);
+		c.gridwidth = 4;
+		pane.add(wf, c);
 		
-		// Sample 3
-		label = new JLabel("Sample:");
+		wf = viewerWaveforms[3];
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 4;
 		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
+		c.gridwidth = 4;
+		pane.add(wf, c);
 		
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 4;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
-		pane.add(cb, c);
-		
-		button = new JButton("Load");
-		c.gridx = 2;
-		c.gridy = 4;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
-		pane.add(button, c);
-		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 25));
+		wf = viewerWaveforms[4];
+		wf.setPreferredSize(new Dimension(270, 60));
 		c.gridx = 0;
 		c.gridy = 5;
 		c.gridheight = 1;
-		c.gridwidth = 5;
-		pane.add(label, c);
-		
-		// Sample 4
-		label = new JLabel("Sample:");
-		c.gridx = 0;
-		c.gridy = 6;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
-		
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 6;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
-		pane.add(cb, c);
-		
-		button = new JButton("Load");
-		c.gridx = 2;
-		c.gridy = 6;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
-		pane.add(button, c);
-		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 25));
-		c.gridx = 0;
-		c.gridy = 7;
-		c.gridheight = 1;
-		c.gridwidth = 5;
-		pane.add(label, c);
-		
-		// Sample 5
-		label = new JLabel("Sample:");
-		c.gridx = 0;
-		c.gridy = 8;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		pane.add(label, c);
-		
-		cb = new JComboBox(sampleStrings);
-		c.gridx = 1;
-		c.gridy = 8;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		cb.setPreferredSize(new Dimension(90, 25));
-		pane.add(cb, c);
-		
-		button = new JButton("Load");
-		c.gridx = 2;
-		c.gridy = 8;
-		c.gridheight = 1;
-		c.gridwidth = 1;
-		button.setPreferredSize(new Dimension(90, 25));
-		pane.add(button, c);
-		
-		label = new JLabel("WAVEFORM GOES HERE");
-		label.setPreferredSize(new Dimension(150, 25));
-		c.gridx = 0;
-		c.gridy = 9;
-		c.gridheight = 1;
-		c.gridwidth = 5;
-		pane.add(label, c);
+		c.gridwidth = 4;
+		pane.add(wf, c);
 		
 		return pane;
 	}
@@ -450,29 +418,32 @@ public class GUI {
 		c.gridy = 2;
 		pane.add(label, c);
 		
-		String[] tempoStrings = new String[230];
+		String[] tempoStrings = new String[231];
 		int tempoNum = 10;
-		for (int i = 0; i < 230; i++) {
+		for (int i = 0; i < 231; i++) {
 			tempoStrings[i] = String.valueOf(tempoNum + i);
 		}
-		JComboBox cb = new JComboBox(tempoStrings);
+		JComboBox<String> cb = new JComboBox<String>(tempoStrings);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.CENTER;
-		cb.setSelectedIndex(118);
 		c.gridx = 1;
 		c.gridy = 0;
+		cb.setSelectedIndex((int)Model.getModel().tempo-10);
+		cb.addActionListener(Listeners.TempoChanged);
 		pane.add(cb, c);
 		
-		// THESE CAN'T BE DUPES
+		// THESE CAN'T BE DUPES - fuck it sure they can
 		String[] fxStrings = {"None", "Low Pass", "High Pass", "Band Pass", "Notch", "Echo", "Bitcrusher", "Bitwise KO"};
-		cb = new JComboBox(fxStrings);
-		cb.setSelectedIndex(0);
+		cb = new JComboBox<String>(fxStrings);
+		cb.setSelectedIndex(Model.getModel().FX1mode);
+		cb.addActionListener(Listeners.FX1Changed);
 		c.gridx = 1;
 		c.gridy = 1;
 		pane.add(cb, c);
 		
-		cb = new JComboBox(fxStrings);
-		cb.setSelectedIndex(1);
+		cb = new JComboBox<String>(fxStrings);
+		cb.setSelectedIndex(Model.getModel().FX2mode);
+		cb.addActionListener(Listeners.FX2Changed);
 		c.gridx = 1;
 		c.gridy = 2;
 		pane.add(cb, c);
@@ -483,6 +454,7 @@ public class GUI {
 		c.gridx = 3;
 		c.gridy = 0;
 		c.gridheight = 3;
+		button.addActionListener(Listeners.ExportMPCConfig);
 		pane.add(button, c);
 
 		return pane;
@@ -511,7 +483,11 @@ public class GUI {
  
         tabbedPane.addTab("Button Config", card1);
         tabbedPane.addTab("Waveform Viewer", card2);
-		
+        if (GUI.loadWaveformTabFirst == 1)
+        {
+        	tabbedPane.setSelectedIndex(1);
+        	GUI.loadWaveformTabFirst = 0;
+        }
 		
 		return tabbedPane;
 	}
@@ -525,14 +501,17 @@ public class GUI {
 		menuBar.add(menu);
 		
 		item = new JMenuItem("Open Config");
+		item.addActionListener(Listeners.OpenMPCConfig);
 		menu.add(item);
 		
 		item = new JMenuItem("Save Config");
+		item.addActionListener(Listeners.ExportMPCConfig);
 		menu.add(item);
 		
 		menu.addSeparator();
 		
 		item = new JMenuItem("Import Sample");
+		item.addActionListener(Listeners.ImportFileFromMenu);
 		menu.add(item);
 		
 		menu.addSeparator();
