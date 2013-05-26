@@ -66,7 +66,7 @@ public class AudioP {
 				max = originalSample[i];
 			}
 		}
-		float scale = 32768/(float)max;
+		float scale = (float)0.95*32768/(float)max;
 		//int scale = 32768/max;
 		System.out.println(scale);
 		
