@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Model {
 
@@ -74,6 +77,50 @@ public class Model {
 	    {
 	    	Model.playing = 0;
 	    	System.out.println("sample done");
+	    }
+	}
+	
+	public static class ImportWorker extends SwingWorker<Integer, Integer>
+	{
+	    protected Integer doInBackground() throws Exception
+	    {
+	    	// Open a filechooser, show audio files only
+			JFileChooser fc = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Audio Files", "mp3", "wav");
+			fc.setFileFilter(filter);
+			int returnVal = fc.showOpenDialog(GUI.masterFrame);
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
+				try
+				{
+					// Check type and import
+					short[] sampleArr;
+					if (Listeners.getExt(fc.getSelectedFile().getName()).equals("mp3"))
+					{
+						System.out.println("MP3 recieved");
+						sampleArr = AudioP.ImportMP3Sample(fc.getSelectedFile().getAbsolutePath());
+					}
+					else
+					{
+						System.out.println("WAV recieved");
+						sampleArr = AudioP.ImportWavSample(fc.getSelectedFile().getAbsolutePath());
+					}
+					Model.getModel().AddSample(sampleArr, fc.getSelectedFile().getName());
+					
+					// Rebuild the GUI
+					GUI.RebuildGUI();					
+				}
+				catch (Exception exc)
+				{
+					JOptionPane.showMessageDialog(null, "Unable to import selected file", "Error", JOptionPane.WARNING_MESSAGE);
+				}
+			}
+	    	return 0;
+	    }
+
+	    protected void done()
+	    {
+	    	System.out.println("Load done");
 	    }
 	}
 

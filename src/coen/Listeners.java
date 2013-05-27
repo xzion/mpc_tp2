@@ -12,7 +12,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Listeners {
 	
-	private static String getExt(String fn)
+	public static String getExt(String fn)
 	{
 		// Simple method to return file extension
 		String ext = null;
@@ -29,37 +29,8 @@ public class Listeners {
 	{
 		public void actionPerformed(ActionEvent e)
 		{
-			// Open a filechooser, show audio files only
-			JFileChooser fc = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Audio Files", "mp3", "wav");
-			fc.setFileFilter(filter);
-			int returnVal = fc.showOpenDialog(GUI.masterFrame);
-			if (returnVal == JFileChooser.APPROVE_OPTION)
-			{
-				try
-				{
-					// Check type and import
-					short[] sampleArr;
-					if (getExt(fc.getSelectedFile().getName()).equals("mp3"))
-					{
-						System.out.println("MP3 recieved");
-						sampleArr = AudioP.ImportMP3Sample(fc.getSelectedFile().getAbsolutePath());
-					}
-					else
-					{
-						System.out.println("WAV recieved");
-						sampleArr = AudioP.ImportWavSample(fc.getSelectedFile().getAbsolutePath());
-					}
-					Model.getModel().AddSample(sampleArr, fc.getSelectedFile().getName());
-					
-					// Rebuild the GUI
-					GUI.RebuildGUI();					
-				}
-				catch (Exception exc)
-				{
-					JOptionPane.showMessageDialog(null, "Unable to import selected file", "Error", JOptionPane.WARNING_MESSAGE);
-				}
-			}
+			Model.ImportWorker newFileWorker = new Model.ImportWorker();
+			newFileWorker.execute();			
 		}
 	};
 	
@@ -185,6 +156,7 @@ public class Listeners {
 		public void actionPerformed(ActionEvent e)
 		{			
 			// Push the sample into the button model
+			Model.player.cancel(true);
 			short[] sample = Model.getModel().getSample(GUI.currentSample);
 			Model.getModel().getButtons().get(GUI.currentButton).SetSample(sample);
 			

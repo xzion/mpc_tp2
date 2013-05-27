@@ -7,11 +7,11 @@ public class FXP {
 	public static short[] applyBitcrusher(short[] originalSample)
 	{
 		System.out.println("THATS THE BITC SHIT");
-		int param = GUI.FXParam/16+1;
+		int param = GUI.FXParam+1;
 		short[] newSample = new short[originalSample.length];
 		for (int i = 0; i < originalSample.length; i++)
 		{
-			newSample[i] = (short)(originalSample[i] / (GUI.FXParam*100));
+			newSample[i] = (short)(originalSample[i] / (param*100));
 		}
 		return AudioP.scaleVolume(newSample);
 	}

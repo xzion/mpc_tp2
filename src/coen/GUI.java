@@ -433,7 +433,7 @@ public class GUI {
 		pane.add(cb, c);
 		
 		// THESE CAN'T BE DUPES - fuck it sure they can
-		String[] fxStrings = {"None", "Low Pass", "High Pass", "Band Pass", "Notch", "Echo", "Bitcrusher", "Bitwise KO"};
+		String[] fxStrings = {"None", "Low Pass", "High Pass", "Band Pass", "Notch", "Echo", "Bitcrusher", "Bitwise KO", "Delay"};
 		cb = new JComboBox<String>(fxStrings);
 		cb.setSelectedIndex(Model.getModel().FX1mode);
 		cb.addActionListener(Listeners.FX1Changed);
